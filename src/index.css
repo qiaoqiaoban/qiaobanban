@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Custom CSS properties for consistent theming */
+  --primary: #4A148C;
+  --primary-foreground: #FFFFFF;
+  --accent: #E000B3;
+  --background: #121212;
+  --surface: #1E1E1E;
+  --border: #3A2B47;
+  --text-primary: #FFFFFF;
+  --text-secondary: #B0B0B0;
+  --success: #00C853;
+  --error: #D50000;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--background);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Custom focus styles */
+.focus-visible:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Custom button animations */
+.btn-primary {
+  @apply bg-accent hover:bg-accent/90 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 focus:scale-105 active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-primary-800 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 border border-border;
+}
+
+.btn-ghost {
+  @apply bg-transparent hover:bg-primary-800/20 text-text-secondary hover:text-text-primary font-medium py-3 px-6 rounded-lg transition-all duration-200 border border-border;
+}
+
+/* Card styles */
+.card {
+  @apply bg-surface border border-border rounded-xl p-6 shadow-lg;
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.9) 0%, rgba(30, 30, 30, 0.7) 100%);
+  border-top: 1px solid rgba(106, 27, 154, 0.3);
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-xl hover:border-primary-800/50;
+}
+
+/* Input styles */
+.input {
+  @apply bg-surface border border-border rounded-lg px-4 py-3 text-text-primary placeholder:text-text-secondary focus:border-primary-800 focus:outline-none transition-colors duration-200;
+}
+
+/* Loading animation */
+.loading-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Pulse animation for loading states */
+.pulse-loading {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom toggle switch */
+.toggle-switch {
+  @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background;
+}
+
+.toggle-switch[data-checked='true'] {
+  @apply bg-accent;
+}
+
+.toggle-switch[data-checked='false'] {
+  @apply bg-border;
+}
+
+.toggle-thumb {
+  @apply inline-block h-4 w-4 transform rounded-full bg-white transition-transform;
+}
+
+.toggle-thumb[data-checked='true'] {
+  @apply translate-x-6;
+}
+
+.toggle-thumb[data-checked='false'] {
+  @apply translate-x-1;
+}
