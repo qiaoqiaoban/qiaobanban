@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
+
+import { usePublicClient,useSendTransaction,useWalletClient  } from 'wagmi';
+import { useWriteContract } from 'wagmi'
+
 import { toast } from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -8,12 +12,19 @@ import { useClosePosition } from '../hooks/useContract';
 import { formatTokenAmount, formatPercentage, formatTimeAgo, getTokenSymbol, getTokenDecimals } from '../lib/utils';
 import { PositionWithPnL } from '../types/contract';
 import { TrendingUp, TrendingDown, Clock, DollarSign, Filter, X } from 'lucide-react';
+import { getUserPositions } from '@/core/contract';
 
 type FilterType = 'all' | 'open' | 'closed';
 type SortType = 'newest' | 'oldest' | 'pnl_desc' | 'pnl_asc';
 
 const PositionsPage = () => {
-  const { isConnected } = useAccount();
+
+    const { address, isConnected } = useAccount();
+    const publicClient = usePublicClient()
+    const { sendTransactionAsync ,sendTransaction} = useSendTransaction()
+    const { writeContractAsync } = useWriteContract()
+    const { data: walletClient } = useWalletClient()
+
   const { positions, openPositions, closedPositions, isLoading } = usePositionsWithPnL();
   const { closePosition, isPending, isConfirming, isSuccess, error } = useClosePosition();
   
@@ -57,11 +68,18 @@ const PositionsPage = () => {
     }
   };
   
+    const init = async()=>
+    {
+      const pos = await getUserPositions(address,publicClient);
+      console.log(pos)
+    }
+    
   // Handle success
   useEffect(() => {
     if (isSuccess) {
       toast.success('Position closed successfully!');
     }
+    init()
   }, [isSuccess]);
   
   // Handle error

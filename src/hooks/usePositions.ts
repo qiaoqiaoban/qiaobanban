@@ -35,7 +35,7 @@ export function usePositionsWithPnL() {
 
   return {
     positions,
-    isLoading: !positionIds,
+    isLoading: false,// !positionIds,
     openPositions: positions.filter(p => p.isOpen),
     closedPositions: positions.filter(p => !p.isOpen),
   };

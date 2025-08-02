@@ -1,15 +1,28 @@
-import { useAccount } from 'wagmi';
+import { useAccount ,usePublicClient,useSendTransaction,useWalletClient  } from 'wagmi';
+import { useWriteContract } from 'wagmi'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { usePortfolioSummary, usePositionsWithPnL } from '../hooks/usePositions';
 import { formatTokenAmount, formatPercentage, formatTimeAgo, getTokenSymbol, getTokenDecimals } from '../lib/utils';
 import { TrendingUp, TrendingDown, DollarSign, PieChart, Activity, Target, Award, Clock } from 'lucide-react';
+import { deposite,redeem } from '@/core/contract';
 
 const PortfolioPage = () => {
-  const { isConnected } = useAccount();
+  const { isConnected,address } = useAccount();
+  const publicClient = usePublicClient()
+  const { sendTransactionAsync ,sendTransaction} = useSendTransaction()
+  const { writeContractAsync } = useWriteContract()
+  const { data: walletClient } = useWalletClient()
   const { summary, isLoading } = usePortfolioSummary();
   const { positions } = usePositionsWithPnL();
-  
+  const deposit = async()=>
+  {
+     await deposite(0,1e18.toString(),address.toString(),publicClient,writeContractAsync)
+  }
+  const withdrw = async()=>
+  {
+    await redeem(0,1e17.toString(),address.toString(),publicClient,writeContractAsync)
+  }
   if (!isConnected) {
     return (
       <div className="max-w-4xl mx-auto">
@@ -293,10 +306,15 @@ const PortfolioPage = () => {
             <div className="text-center py-8">
               <Activity className="h-12 w-12 text-text-secondary mx-auto mb-4" />
               <p className="text-text-secondary mb-4">No trading activity yet</p>
-              <Button onClick={() => window.location.href = '/trade'}>
-                Start Trading
+              <Button onClick={deposit}>
+                Debug Deposite
+              </Button>
+
+              <Button onClick={withdrw}>
+                Debug Withdraw
               </Button>
             </div>
+            
           ) : (
             <div className="space-y-3">
               {recentPositions.map((position) => (

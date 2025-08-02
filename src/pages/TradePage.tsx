@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAccount, useBalance } from 'wagmi';
+import { usePublicClient,useSendTransaction,useWalletClient  } from 'wagmi';
+import { useWriteContract } from 'wagmi'
 import { parseEther } from 'viem';
 import { toast } from 'react-hot-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -8,9 +10,15 @@ import { useOpenPosition } from '../hooks/useContract';
 import { TOKEN_TYPES, TOKEN_INFO, MAX_LEVERAGE } from '../constants/contract';
 import { formatTokenAmount, parseTokenAmount, getTokenSymbol, getTokenDecimals } from '../lib/utils';
 import { TrendingUp, Info, AlertTriangle } from 'lucide-react';
+import { getUserPositions, open } from '@/core/contract';
 
 const TradePage = () => {
   const { address, isConnected } = useAccount();
+  const publicClient = usePublicClient()
+  const { sendTransactionAsync ,sendTransaction} = useSendTransaction()
+  const { writeContractAsync } = useWriteContract()
+  const { data: walletClient } = useWalletClient()
+
   const [selectedToken, setSelectedToken] = useState<keyof typeof TOKEN_TYPES>('WETH');
   const [mortgageAmount, setMortgageAmount] = useState('');
   const [leverage, setLeverage] = useState(1);
@@ -43,10 +51,26 @@ const TradePage = () => {
     setShowConfirmModal(true);
   };
   
-  const confirmOpenPosition = () => {
-    openPosition(tokenType, mortgageBigInt, investmentAmount);
+  const confirmOpenPosition =async () => {
+    // openPosition(tokenType, mortgageBigInt, investmentAmount);
+
+    await open(
+      0,
+      "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
+      (Number(mortgageAmount)*1e18).toFixed(0),
+      (Number(mortgageAmount)*Number(leverage)*1e18).toFixed(0),
+      address,
+      publicClient,
+      writeContractAsync
+    )
     setShowConfirmModal(false);
   };
+
+  const init = async()=>
+  {
+    const pos = await getUserPositions(address,publicClient);
+    console.log(pos)
+  }
   
   // Handle success
   useEffect(() => {
@@ -55,6 +79,7 @@ const TradePage = () => {
       setMortgageAmount('');
       setLeverage(1);
     }
+
   }, [isSuccess]);
   
   // Handle error
@@ -103,7 +128,7 @@ const TradePage = () => {
             <div>
               <label className="block text-sm font-medium mb-2">Select Token</label>
               <div className="grid grid-cols-3 gap-2">
-                {Object.keys(TOKEN_TYPES).slice(1,4).map((token) => (
+                {Object.keys(TOKEN_TYPES).slice(3,5).map((token) => (
                   <button
                     key={token}
                     onClick={() => setSelectedToken(token as keyof typeof TOKEN_TYPES)}
@@ -281,7 +306,7 @@ const TradePage = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Collateral:</span>
-                  <span className="font-medium">{mortgageAmount} {selectedToken}</span>
+                  <span className="font-medium">{mortgageAmount} Mon</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Leverage:</span>
