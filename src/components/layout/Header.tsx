@@ -32,7 +32,7 @@ const Header = () => {
               <TrendingUp className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold gradient-text hidden sm:block">
-            ⚖️ Protocol
+            ⚖️ QiaoQiaoBan Protocol
             </span>
           </Link>
 

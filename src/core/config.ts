@@ -8,11 +8,11 @@ export const config = {
             "weth":"0xE3D2ac4D44dEb1CD3edA9bf3Dcf74B8Ef12921eC"
         },
         tokens:{
-            "wmon":"0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+            "wmon":"0x760AfE86e5de5fa0Ee542fc7B7B713e1c5425701",
             "usdt":"0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
             "usdc":"0x3c499c542cef5e3811e1192ce70d8cc03d5c3359",
             "wbtc":"0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
-            "weth":"0x7ceb23fd6bc0add59e62ac25578270cff1b9f619"
+            "weth":"0xB5a30b0FDc5EA94A52fDc42e3E9760Cb8449Fb37"
         },
         tokensInfo:{
             wmon:{

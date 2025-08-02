@@ -10,7 +10,7 @@ import { useOpenPosition } from '../hooks/useContract';
 import { TOKEN_TYPES, TOKEN_INFO, MAX_LEVERAGE } from '../constants/contract';
 import { formatTokenAmount, parseTokenAmount, getTokenSymbol, getTokenDecimals } from '../lib/utils';
 import { TrendingUp, Info, AlertTriangle } from 'lucide-react';
-import { getUserPositions, open } from '@/core/contract';
+import { config, getTokenAmountsOut, getUserPositions, open } from '@/core/contract';
 
 const TradePage = () => {
   const { address, isConnected } = useAccount();
@@ -54,11 +54,15 @@ const TradePage = () => {
   const confirmOpenPosition =async () => {
     // openPosition(tokenType, mortgageBigInt, investmentAmount);
 
+    // init();
+    // return 0; 
+    console.log(selectedToken,TOKEN_INFO[TOKEN_TYPES[selectedToken]])
+    let l = leverage==1 ? 1.1 :leverage;
     await open(
       0,
-      "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6",
+      TOKEN_INFO[TOKEN_TYPES[selectedToken]].address,
       (Number(mortgageAmount)*1e18).toFixed(0),
-      (Number(mortgageAmount)*Number(leverage)*1e18).toFixed(0),
+      (Number(mortgageAmount)*Number(l)*1e18).toFixed(0),
       address,
       publicClient,
       writeContractAsync
@@ -68,8 +72,13 @@ const TradePage = () => {
 
   const init = async()=>
   {
-    const pos = await getUserPositions(address,publicClient);
-    console.log(pos)
+    const out = await getTokenAmountsOut(
+      config.address.tokens.wmon,
+      config.address.tokens.wbtc,
+      "1000000",
+      publicClient
+    )
+    console.log(out)
   }
   
   // Handle success
@@ -95,7 +104,7 @@ const TradePage = () => {
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Page Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold gradient-text">Leverage Trading</h1>
+        <h1 className="text-4xl font-bold gradient-text">QiaoQiaoBan Trading</h1>
         <p className="text-text-secondary text-lg max-w-2xl mx-auto">
           Open leveraged positions using ETH, USDT, or USDC as collateral. Maximum leverage: {MAX_LEVERAGE}x
         </p>
