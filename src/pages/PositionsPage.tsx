@@ -12,7 +12,7 @@ import { useClosePosition } from '../hooks/useContract';
 import { formatTokenAmount, formatPercentage, formatTimeAgo, getTokenSymbol, getTokenDecimals } from '../lib/utils';
 import { PositionWithPnL } from '../types/contract';
 import { TrendingUp, TrendingDown, Clock, DollarSign, Filter, X } from 'lucide-react';
-import { getUserPositions } from '@/core/contract';
+import { close, getUserPositions } from '@/core/contract';
 
 type FilterType = 'all' | 'open' | 'closed';
 type SortType = 'newest' | 'oldest' | 'pnl_desc' | 'pnl_asc';
@@ -34,35 +34,56 @@ const PositionsPage = () => {
   const [showCloseModal, setShowCloseModal] = useState(false);
   
   // Filter and sort positions
-  const filteredPositions = positions.filter(position => {
-    if (filter === 'open') return position.isOpen;
-    if (filter === 'closed') return !position.isOpen;
-    return true;
-  });
+  // const filteredPositions = positions.filter(position => {
+  //   if (filter === 'open') return position.isOpen;
+  //   if (filter === 'closed') return !position.isOpen;
+  //   return true;
+  // });
   
-  const sortedPositions = [...filteredPositions].sort((a, b) => {
-    switch (sort) {
-      case 'newest':
-        return Number(b.openTime - a.openTime);
-      case 'oldest':
-        return Number(a.openTime - b.openTime);
-      case 'pnl_desc':
-        return Number(b.pnl - a.pnl);
-      case 'pnl_asc':
-        return Number(a.pnl - b.pnl);
-      default:
-        return 0;
-    }
-  });
-  
+  // const sortedPositions = [...filteredPositions].sort((a, b) => {
+  //   switch (sort) {
+  //     case 'newest':
+  //       return Number(b.openTime - a.openTime);
+  //     case 'oldest':
+  //       return Number(a.openTime - b.openTime);
+  //     case 'pnl_desc':
+  //       return Number(b.pnl - a.pnl);
+  //     case 'pnl_asc':
+  //       return Number(a.pnl - b.pnl);
+  //     default:
+  //       return 0;
+  //   }
+  // });
+
+  const [sortedPositions,setSortedPositions] = useState([]);
+  /**
+   * 
+   *         id: BigInt(index),
+        types: index % 3, // Rotate between ETH, USDT, USDC
+        owner: address || '0x0',
+        mortgageAmount: BigInt(1000000000000000000), // 1 ETH in wei
+        investAmount: BigInt(5000000000000000000), // 5 ETH in wei
+        tokenAmount: BigInt(5000000000000000000), // 5 ETH in wei
+        isOpen: index < 3, // First 3 positions are open
+        openTime: BigInt(Date.now() - (index * 24 * 60 * 60 * 1000)), // Stagger open times
+        currentValue: BigInt(5500000000000000000 - (index * 100000000000000000)), // Varying current values
+        pnl: BigInt(500000000000000000 - (index * 200000000000000000)), // Varying P&L
+        pnlPercentage: 10 - (index * 4), // Varying P&L percentage
+   */
   const handleClosePosition = (position: PositionWithPnL) => {
     setSelectedPosition(position);
     setShowCloseModal(true);
   };
   
-  const confirmClosePosition = () => {
+  const confirmClosePosition = async () => {
     if (selectedPosition) {
       closePosition(selectedPosition.id);
+
+      await close(
+        Number(selectedPosition.id),
+        address,
+        writeContractAsync
+      )
       setShowCloseModal(false);
       setSelectedPosition(null);
     }
@@ -72,6 +93,28 @@ const PositionsPage = () => {
     {
       const pos = await getUserPositions(address,publicClient);
       console.log(pos)
+      let ret = [];
+      pos.forEach(e => {
+        console.log(e)
+        ret.push(
+          {
+            id: e.id,
+            types: 0, // Rotate between ETH, USDT, USDC
+            owner: address || '0x0',
+            mortgageAmount: e.mortgageAmount, // 1 ETH in wei
+            investAmount: e.investAmount, // 5 ETH in wei
+            tokenAmount: e.tokenAmount, // 5 ETH in wei
+            isOpen: 3, // First 3 positions are open
+            openTime: e.openTime*1000, // Stagger open times
+            currentValue: BigInt(5500000000000000000 - ( 100000000000000000)), // Varying current values
+            pnl: 1e14, // Varying P&L
+            pnlPercentage: 10 - ( 4), // Varying P&L percentage
+          }
+        )
+      });
+      setSortedPositions(
+        ret
+      )
     }
     
   // Handle success
@@ -80,6 +123,8 @@ const PositionsPage = () => {
       toast.success('Position closed successfully!');
     }
     init()
+
+
   }, [isSuccess]);
   
   // Handle error

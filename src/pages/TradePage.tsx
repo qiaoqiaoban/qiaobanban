@@ -20,7 +20,8 @@ const TradePage = () => {
   const { data: walletClient } = useWalletClient()
 
   const [selectedToken, setSelectedToken] = useState<keyof typeof TOKEN_TYPES>('WETH');
-  const [mortgageAmount, setMortgageAmount] = useState('');
+  const [mortgageAmount, setMortgageAmount] = useState('0.01');
+  const [tokenAmount, setTokenAmount] = useState('');
   const [leverage, setLeverage] = useState(1);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   
@@ -53,9 +54,7 @@ const TradePage = () => {
   
   const confirmOpenPosition =async () => {
     // openPosition(tokenType, mortgageBigInt, investmentAmount);
-
-    // init();
-    // return 0; 
+ 
     console.log(selectedToken,TOKEN_INFO[TOKEN_TYPES[selectedToken]])
     let l = leverage==1 ? 1.1 :leverage;
     await open(
@@ -72,22 +71,27 @@ const TradePage = () => {
 
   const init = async()=>
   {
-    const out = await getTokenAmountsOut(
+    await updateOut()
+  }
+
+  const updateOut = async () =>
+  {
+    const amt = await getTokenAmountsOut(
       config.address.tokens.wmon,
-      config.address.tokens.wbtc,
-      "1000000",
+      TOKEN_INFO[TOKEN_TYPES[selectedToken]].address,
+      (Number(mortgageAmount)*Number(leverage)*1e18).toFixed(0),
       publicClient
     )
-    console.log(out)
+    console.log(amt)
+    const out = (Number(amt[1])/Math.pow(10,16)).toFixed(4)
+    setTokenAmount(out);
   }
   
   // Handle success
   useEffect(() => {
-    if (isSuccess) {
-      toast.success('Position opened successfully!');
-      setMortgageAmount('');
-      setLeverage(1);
-    }
+    setMortgageAmount('0.01');
+    setLeverage(1);
+    init()
 
   }, [isSuccess]);
   
@@ -165,7 +169,10 @@ const TradePage = () => {
                 <input
                   type="number"
                   value={mortgageAmount}
-                  onChange={(e) => setMortgageAmount(e.target.value)}
+                  onChange={(e) => {
+                    setMortgageAmount(e.target.value)
+                    updateOut()
+                  }}
                   placeholder="0.0"
                   className="input w-full pr-20"
                   step="0.000001"
@@ -197,7 +204,10 @@ const TradePage = () => {
                   min="1"
                   max={MAX_LEVERAGE}
                   value={leverage}
-                  onChange={(e) => setLeverage(Number(e.target.value))}
+                  onChange={(e) => {
+                    setLeverage(Number(e.target.value));
+                    updateOut()
+                  }}
                   className="w-full h-2 bg-surface-elevated rounded-lg appearance-none cursor-pointer slider"
                   style={{
                     background: `linear-gradient(to right, #E000B3 0%, #E000B3 ${(leverage - 1) / (MAX_LEVERAGE - 1) * 100}%, #2A2A2A ${(leverage - 1) / (MAX_LEVERAGE - 1) * 100}%, #2A2A2A 100%)`
@@ -220,7 +230,7 @@ const TradePage = () => {
 
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">Make Long:</span>
-                <span>{mortgageAmount || '0'} {selectedToken}</span>
+                <span>{tokenAmount || '0'} {selectedToken}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-text-secondary">Leverage:</span>
@@ -229,7 +239,7 @@ const TradePage = () => {
               <div className="flex justify-between font-medium border-t border-border pt-2">
                 <span>Investment Amount:</span>
                 <span className="text-accent">
-                  {formatTokenAmount(investmentAmount, tokenDecimals, 6)} {selectedToken}
+                  {tokenAmount} {selectedToken}
                 </span>
               </div>
             </div>
@@ -324,7 +334,7 @@ const TradePage = () => {
                 <div className="flex justify-between border-t border-border pt-2">
                   <span className="text-text-secondary">Investment:</span>
                   <span className="font-medium text-accent">
-                    {formatTokenAmount(investmentAmount, tokenDecimals, 6)} {selectedToken}
+                    {tokenAmount} {selectedToken}
                   </span>
                 </div>
               </div>

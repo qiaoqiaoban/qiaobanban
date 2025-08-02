@@ -337,13 +337,17 @@ const open = async (type:number=0,toToken:string,mortgage:string="0",amount:stri
         {
             try {
                 console.log("Now try close")
+                console.log(
+                    positionId,to
+                )
                 const ret = await sendTx({
-                    address: to,
+                    address: config.address.router,
                     abi: config.abi.pair,
                     functionName: 'close',
                     args: [
                         positionId
                     ],
+                    account:to
                   })
                 return ret;
               } catch (error) {
